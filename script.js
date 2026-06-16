@@ -22,22 +22,73 @@ const GRID_PARAMS = [
 
 /* ================================================================
    BUILD PARAMETER UI
+   ================================================================
+   Each parameter row renders:
+     [min box] ——— slider ——— [max box]   [value box]
+
+   All three number inputs are directly editable:
+   - Editing the value box moves the slider and clamps to [min,max]
+     if within range, or extends the range silently if outside it.
+   - Editing a bound box re-ranges the slider; if the current value
+     falls outside the new bound it is clamped to the bound.
+   - Dragging the slider updates the value box.
    ================================================================ */
 function buildParamGrid(params, containerId) {
   const grid = document.getElementById(containerId);
+
   params.forEach(p => {
     const row = document.createElement('div');
     row.className = 'param-row';
     row.innerHTML = `
       <div class="param-label">${p.label}</div>
       <div class="param-ctrl">
-        <input type="range" id="${p.id}" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.def}">
-        <span class="param-val" id="${p.id}-v">${p.fmt(p.def)}</span>
+        <input type="number" class="p-bound" id="${p.id}-min" value="${p.min}" step="${p.step}" title="Slider minimum">
+        <input type="range"  id="${p.id}"     min="${p.min}" max="${p.max}" step="${p.step}" value="${p.def}">
+        <input type="number" class="p-bound" id="${p.id}-max" value="${p.max}" step="${p.step}" title="Slider maximum">
+        <input type="number" class="p-val"   id="${p.id}-v"   value="${p.fmt(p.def)}"        step="${p.step}" title="Current value">
       </div>`;
     grid.appendChild(row);
-    const el = row.querySelector('input');
-    const out = row.querySelector('.param-val');
-    el.addEventListener('input', () => { out.textContent = p.fmt(+el.value); });
+
+    const slider  = row.querySelector(`#${p.id}`);
+    const minBox  = row.querySelector(`#${p.id}-min`);
+    const maxBox  = row.querySelector(`#${p.id}-max`);
+    const valBox  = row.querySelector(`#${p.id}-v`);
+
+    /* slider → value box */
+    slider.addEventListener('input', () => {
+      valBox.value = p.fmt(+slider.value);
+    });
+
+    /* value box → slider (extend range if needed) */
+    valBox.addEventListener('change', () => {
+      let v = +valBox.value;
+      if (!isFinite(v)) { valBox.value = p.fmt(+slider.value); return; }
+      /* auto-extend bounds if user typed outside them */
+      if (v < +minBox.value) { minBox.value = p.fmt(v); slider.min = v; }
+      if (v > +maxBox.value) { maxBox.value = p.fmt(v); slider.max = v; }
+      slider.value = v;
+      valBox.value = p.fmt(v);
+    });
+
+    /* min box → slider range (clamp current value if needed) */
+    minBox.addEventListener('change', () => {
+      const lo = +minBox.value;
+      slider.min = lo;
+      if (+slider.value < lo) {
+        slider.value = lo;
+        valBox.value = p.fmt(lo);
+      }
+    });
+
+    /* max box → slider range (clamp current value if needed) */
+    maxBox.addEventListener('change', () => {
+      const hi = +maxBox.value;
+      slider.max = hi;
+      if (+slider.value > hi) {
+        slider.value = hi;
+        valBox.value = p.fmt(hi);
+      }
+    });
   });
 }
 
@@ -46,7 +97,11 @@ buildParamGrid(GRID_PARAMS, 'grid-grid');
 
 function getParams() {
   const r = {};
-  [...OPT_PARAMS, ...GRID_PARAMS].forEach(p => { r[p.id] = +document.getElementById(p.id).value; });
+  [...OPT_PARAMS, ...GRID_PARAMS].forEach(p => {
+    /* prefer the editable value box; fall back to the slider */
+    const vbox = document.getElementById(`${p.id}-v`);
+    r[p.id] = vbox ? +vbox.value : +document.getElementById(p.id).value;
+  });
   r.nx = r.nx | 0; r.ny = r.ny | 0; r.nz = r.nz | 0;
   return r;
 }
