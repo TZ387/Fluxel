@@ -185,7 +185,17 @@ function computeDiffusion(p) {
     }
   }
 
-  return { phi, abs };
+  return {
+    phi, abs,
+    /* Derived quantities, handed back so callers (e.g. the status line)
+       don't need to recompute them from p a second time. */
+    derived: {
+      musp,
+      D,
+      mueff,
+      delta: 1.0 / mueff,   /* penetration depth */
+    },
+  };
 }
 
 /* ================================================================
@@ -428,7 +438,7 @@ document.getElementById('run-btn').addEventListener('click', () => {
   /* Yield to browser for status paint, then compute */
   setTimeout(() => {
     const t0        = performance.now();
-    const { phi, abs } = computeDiffusion(p);
+    const { phi, abs, derived } = computeDiffusion(p);
     const dt        = (performance.now() - t0).toFixed(1);
 
     Simulation.set(p.nx, p.ny, p.nz, phi, abs);
@@ -450,11 +460,7 @@ document.getElementById('run-btn').addEventListener('click', () => {
     redraw('phi');
     redraw('abs');
 
-    /* Derived quantities */
-    const musp  = p.mus * (1 - p.g);
-    const D     = 1 / (3 * (p.mua + musp));
-    const mueff = Math.sqrt(3 * p.mua * (p.mua + musp));
-    const delta = 1 / mueff;   /* penetration depth */
+    const { musp, D, mueff, delta } = derived;
 
     st.textContent =
       `Done in ${dt} ms — μ_s' = ${musp.toFixed(2)} cm⁻¹ | ` +
