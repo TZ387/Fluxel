@@ -341,16 +341,26 @@ function drawSlices(cvId, vol, nx, ny, nz, ix, iy, iz, vmin, vmax) {
    they were computed on. Wrapped in an object (rather than loose
    globals) so the fields it owns and the ways it can be mutated
    are explicit and in one place.
+
+   Each volume is paired with a cached log-transform (`logVol`,
+   `logMin`, `logMax`, `vmin`, `vmax`), computed once in `set()`.
+   `redraw()` fires on every axis-slider drag, which only changes
+   which slice is *displayed*, not the underlying data — so without
+   this cache the full nx·ny·nz scan + log-transform would be
+   redone on every single slider tick.
    ================================================================ */
 const Simulation = {
   nx: 40, ny: 40, nz: 40,
   phi: null,
   abs: null,
+  cache: { phi: null, abs: null },  // { logVol, vmin, vmax, logMin, logMax } per volume
 
-  /** Store a freshly computed result and remember the grid it used. */
+  /** Store a freshly computed result, remember its grid, and build the log-cache. */
   set(nx, ny, nz, phi, abs) {
     this.nx = nx; this.ny = ny; this.nz = nz;
     this.phi = phi; this.abs = abs;
+    this.cache.phi = buildLogCache(phi);
+    this.cache.abs = buildLogCache(abs);
   },
 
   /** 'phi' | 'abs' → the matching Float64Array, or null if not yet computed. */
@@ -358,10 +368,37 @@ const Simulation = {
     return suffix === 'phi' ? this.phi : this.abs;
   },
 
+  /** 'phi' | 'abs' → its cached { logVol, vmin, vmax, logMin, logMax }, or null. */
+  logCache(suffix) {
+    return this.cache[suffix];
+  },
+
   hasData() {
     return this.phi !== null;
   },
 };
+
+/**
+ * Scan a volume for its min/max and build a log10-transformed copy,
+ * used for colormap normalisation (log scale shows dynamic range better
+ * than linear). Non-positive values map to `logMin`.
+ */
+function buildLogCache(vol) {
+  let vmin = Infinity, vmax = -Infinity;
+  for (let i = 0; i < vol.length; i++) {
+    if (vol[i] > vmax) vmax = vol[i];
+    if (vol[i] < vmin) vmin = vol[i];
+  }
+
+  const logVol = new Float64Array(vol.length);
+  const logMin = vmin > 0 ? Math.log10(vmin) : Math.log10(Math.max(vmax * 1e-6, 1e-30));
+  const logMax = vmax > 0 ? Math.log10(vmax) : 0;
+  for (let i = 0; i < vol.length; i++) {
+    logVol[i] = vol[i] > 0 ? Math.log10(vol[i]) : logMin;
+  }
+
+  return { logVol, vmin, vmax, logMin, logMax };
+}
 
 /* ================================================================
    AXIS SLIDERS FOR EACH PLOT
@@ -398,23 +435,10 @@ function getSlice(suffix) {
 }
 
 function redraw(suffix) {
-  const vol = Simulation.volume(suffix);
-  if (!vol) return;
+  const cache = Simulation.logCache(suffix);
+  if (!cache) return;
   const { ix, iy, iz } = getSlice(suffix);
-
-  let vmin = Infinity, vmax = -Infinity;
-  for (let i = 0; i < vol.length; i++) {
-    if (vol[i] > vmax) vmax = vol[i];
-    if (vol[i] < vmin) vmin = vol[i];
-  }
-
-  /* Use log scale for colormap normalisation — better shows dynamic range */
-  const logVol = new Float64Array(vol.length);
-  const logMin = vmin > 0 ? Math.log10(vmin) : Math.log10(Math.max(vmax * 1e-6, 1e-30));
-  const logMax = vmax > 0 ? Math.log10(vmax) : 0;
-  for (let i = 0; i < vol.length; i++) {
-    logVol[i] = vol[i] > 0 ? Math.log10(vol[i]) : logMin;
-  }
+  const { logVol, vmin, vmax, logMin, logMax } = cache;
 
   drawSlices(`cv-${suffix}`, logVol, Simulation.nx, Simulation.ny, Simulation.nz, ix, iy, iz, logMin, logMax);
   drawColorbar(
