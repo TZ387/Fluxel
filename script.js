@@ -325,15 +325,42 @@ function drawSlices(cvId, vol, nx, ny, nz, ix, iy, iz, vmin, vmax) {
 }
 
 /* ================================================================
+   SIMULATION STATE
+   ================================================================
+   Holds the most recent computed volumes plus the grid dimensions
+   they were computed on. Wrapped in an object (rather than loose
+   globals) so the fields it owns and the ways it can be mutated
+   are explicit and in one place.
+   ================================================================ */
+const Simulation = {
+  nx: 40, ny: 40, nz: 40,
+  phi: null,
+  abs: null,
+
+  /** Store a freshly computed result and remember the grid it used. */
+  set(nx, ny, nz, phi, abs) {
+    this.nx = nx; this.ny = ny; this.nz = nz;
+    this.phi = phi; this.abs = abs;
+  },
+
+  /** 'phi' | 'abs' → the matching Float64Array, or null if not yet computed. */
+  volume(suffix) {
+    return suffix === 'phi' ? this.phi : this.abs;
+  },
+
+  hasData() {
+    return this.phi !== null;
+  },
+};
+
+/* ================================================================
    AXIS SLIDERS FOR EACH PLOT
    ================================================================ */
-let STATE = { nx: 40, ny: 40, nz: 40, phi: null, abs: null };
-
 function buildAxisSliders(containerId, suffix) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
   ['x', 'y', 'z'].forEach(ax => {
-    const dim  = ax === 'x' ? STATE.nx : ax === 'y' ? STATE.ny : STATE.nz;
+    const dim  = ax === 'x' ? Simulation.nx : ax === 'y' ? Simulation.ny : Simulation.nz;
     const defV = Math.floor(dim / 2);
     const row  = document.createElement('div');
     row.className = 'axis-row';
@@ -361,7 +388,7 @@ function getSlice(suffix) {
 }
 
 function redraw(suffix) {
-  const vol = suffix === 'phi' ? STATE.phi : STATE.abs;
+  const vol = Simulation.volume(suffix);
   if (!vol) return;
   const { ix, iy, iz } = getSlice(suffix);
 
@@ -379,7 +406,7 @@ function redraw(suffix) {
     logVol[i] = vol[i] > 0 ? Math.log10(vol[i]) : logMin;
   }
 
-  drawSlices(`cv-${suffix}`, logVol, STATE.nx, STATE.ny, STATE.nz, ix, iy, iz, logMin, logMax);
+  drawSlices(`cv-${suffix}`, logVol, Simulation.nx, Simulation.ny, Simulation.nz, ix, iy, iz, logMin, logMax);
   drawColorbar(
     `cbar-${suffix}`,
     `clbl-${suffix}-hi`, `clbl-${suffix}-mid`, `clbl-${suffix}-lo`,
@@ -404,8 +431,7 @@ document.getElementById('run-btn').addEventListener('click', () => {
     const { phi, abs } = computeDiffusion(p);
     const dt        = (performance.now() - t0).toFixed(1);
 
-    STATE.nx = p.nx; STATE.ny = p.ny; STATE.nz = p.nz;
-    STATE.phi = phi; STATE.abs = abs;
+    Simulation.set(p.nx, p.ny, p.nz, phi, abs);
 
     /* Show plots section */
     document.getElementById('plots').style.display = '';
