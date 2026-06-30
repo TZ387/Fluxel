@@ -10,7 +10,7 @@ A browser-based simulator for light transport in biological tissue using the **d
 
 The simulator implements the **pencil beam diffusion approximation** (Farrell, Patterson & Wilson, *Med. Phys.* 19(4), 1992). A narrow collimated beam entering a homogeneous tissue slab is modelled as an isotropic point source placed one transport mean free path below the surface. The extrapolated boundary condition accounts for the refractive index mismatch at the air–tissue interface. The resulting fluence field is computed analytically per voxel using a real source + image source pair:
 
-```
+```text
 Φ(r) = P₀ / (4π D) · [ exp(-μ_eff r₁)/r₁  −  exp(-μ_eff r₂)/r₂ ]
 ```
 
@@ -19,7 +19,7 @@ Absorption rate density follows directly as `A = μ_a · Φ`.
 ## Parameters
 
 | Symbol | Meaning | Unit |
-|--------|---------|------|
+| -------- | --------- | ------ |
 | μ_a | Absorption coefficient | cm⁻¹ |
 | μ_s | Scattering coefficient | cm⁻¹ |
 | g | Anisotropy factor | — |
@@ -41,7 +41,7 @@ Two plots are shown side by side: fluence Φ and absorption A, both on a logarit
 
 ## File structure
 
-```
+```text
 index.html   — page structure and layout
 script.js    — physics, rendering, and UI logic
 style.css    — dark-theme styling

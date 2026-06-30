@@ -463,7 +463,7 @@ document.getElementById('run-btn').addEventListener('click', () => {
     const { musp, D, mueff, delta } = derived;
 
     st.textContent =
-      `Done in ${dt} ms — μ_s' = ${musp.toFixed(2)} cm⁻¹ | ` +
+      `Done in ${dt} ms — μ_s' = ${musp.toFixed(3)} cm⁻¹ | ` +
       `D = ${D.toFixed(4)} cm | μ_eff = ${mueff.toFixed(4)} cm⁻¹ | δ = ${delta.toFixed(3)} cm`;
 
     btn.disabled = false;
