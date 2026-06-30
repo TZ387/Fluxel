@@ -45,7 +45,7 @@ function buildParamGrid(params, containerId) {
         <input type="number" class="p-bound" id="${p.id}-min" value="${p.min}" step="${p.step}" title="Slider minimum">
         <input type="range"  id="${p.id}"     min="${p.min}" max="${p.max}" step="${p.step}" value="${p.def}">
         <input type="number" class="p-bound" id="${p.id}-max" value="${p.max}" step="${p.step}" title="Slider maximum">
-        <input type="number" class="p-val"   id="${p.id}-v"   value="${p.fmt(p.def)}"        step="${p.step}" title="Current value">
+        <input type="number" class="p-val"   id="${p.id}-v"   value="${p.fmt(p.def)}"        step="${p.step}" title="Current value",  readonly>
       </div>`;
     grid.appendChild(row);
 
