@@ -4,20 +4,20 @@
    PARAMETER DEFINITIONS
    ================================================================ */
 const OPT_PARAMS = [
-  { id: 'mua', label: 'μ_a  absorption [cm⁻¹]',   min: 0.01, max: 5,    step: 0.01, def: 0.1,  fmt: v => v.toFixed(2) },
-  { id: 'mus', label: 'μ_s  scattering [cm⁻¹]',    min: 1,    max: 300,  step: 1,    def: 100,  fmt: v => v.toFixed(0) },
-  { id: 'g',   label: 'g    anisotropy factor',     min: 0,    max: 0.99, step: 0.01, def: 0.9,  fmt: v => v.toFixed(2) },
-  { id: 'n',   label: 'n    refractive index',      min: 1.0,  max: 1.7,  step: 0.01, def: 1.4,  fmt: v => v.toFixed(2) },
-  { id: 'p0',  label: 'P₀   input power [W]',       min: 0.01, max: 10,   step: 0.01, def: 1.0,  fmt: v => v.toFixed(2) },
+  { id: 'mua', label: 'μ_a  absorption [cm⁻¹]',   min: 0.01, max: 5,    step: 0.001, def: 0.1,  fmt: v => v.toFixed(3) },
+  { id: 'mus', label: 'μ_s  scattering [cm⁻¹]',    min: 1,    max: 300,  step: 0.001, def: 100,  fmt: v => v.toFixed(3) },
+  { id: 'g',   label: 'g    anisotropy factor',     min: 0,    max: 0.99, step: 0.001, def: 0.9,  fmt: v => v.toFixed(3) },
+  { id: 'n',   label: 'n    refractive index',      min: 1.0,  max: 1.7,  step: 0.001, def: 1.4,  fmt: v => v.toFixed(3) },
+  { id: 'p0',  label: 'P₀   input power [W]',       min: 0.01, max: 10,   step: 0.001, def: 1.0,  fmt: v => v.toFixed(3) },
 ];
 
 const GRID_PARAMS = [
-  { id: 'lx', label: 'L_x  [cm]',    min: 0.5, max: 6, step: 0.1, def: 2, fmt: v => v.toFixed(1) },
-  { id: 'ly', label: 'L_y  [cm]',    min: 0.5, max: 6, step: 0.1, def: 2, fmt: v => v.toFixed(1) },
-  { id: 'lz', label: 'L_z  [cm]',    min: 0.5, max: 6, step: 0.1, def: 2, fmt: v => v.toFixed(1) },
-  { id: 'nx', label: 'N_x  voxels',  min: 10,  max: 80, step: 5,  def: 40, fmt: v => v.toFixed(0) },
-  { id: 'ny', label: 'N_y  voxels',  min: 10,  max: 80, step: 5,  def: 40, fmt: v => v.toFixed(0) },
-  { id: 'nz', label: 'N_z  voxels',  min: 10,  max: 80, step: 5,  def: 40, fmt: v => v.toFixed(0) },
+  { id: 'lx', label: 'L_x  [cm]',    min: 0.5, max: 6, step: 0.001, def: 2, fmt: v => v.toFixed(3) },
+  { id: 'ly', label: 'L_y  [cm]',    min: 0.5, max: 6, step: 0.001, def: 2, fmt: v => v.toFixed(3) },
+  { id: 'lz', label: 'L_z  [cm]',    min: 0.5, max: 6, step: 0.001, def: 2, fmt: v => v.toFixed(3) },
+  { id: 'nx', label: 'N_x  voxels',  min: 10,  max: 80, step: 1,  def: 40, fmt: v => v.toFixed(0) },
+  { id: 'ny', label: 'N_y  voxels',  min: 10,  max: 80, step: 1,  def: 40, fmt: v => v.toFixed(0) },
+  { id: 'nz', label: 'N_z  voxels',  min: 10,  max: 80, step: 1,  def: 40, fmt: v => v.toFixed(0) },
 ];
 
 /* ================================================================
