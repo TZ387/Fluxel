@@ -535,6 +535,33 @@ function redraw(suffix) {
 }
 
 /* ================================================================
+   RESPONSIVE CANVAS RESIZE
+   ================================================================
+   The plot canvases are sized in JS (cv.width/height) to match their
+   rendered CSS pixel size, so they stay crisp at any zoom level. That
+   sizing previously only ran right after a compute or while dragging
+   an axis slider — so browser zoom (which fires a 'resize' event but
+   touches neither of those) left the canvases stale: blurry, wrongly
+   proportioned, or misaligned with their container. This listener
+   re-applies that sizing and redraws whenever the viewport changes,
+   which covers window resizing as well as zooming in/out.
+   ================================================================ */
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (!Simulation.hasData()) return;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    ['cv-phi', 'cv-abs'].forEach(id => {
+      const cv = document.getElementById(id);
+      cv.width  = cv.offsetWidth  || 400;
+      cv.height = cv.offsetHeight || 400;
+    });
+    redraw('phi');
+    redraw('abs');
+  }, 120);
+});
+
+/* ================================================================
    MAIN RUN HANDLER
    ================================================================ */
 document.getElementById('run-btn').addEventListener('click', () => {
