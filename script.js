@@ -131,7 +131,7 @@ function getParams() {
    Absorption rate density:
      A = μ_a · Φ
    ================================================================ */
-function computeDiffusion(p) {
+function computeDiffusion_FPW1992(p) {
   const { mua, mus, g, n, p0, lx, ly, lz, nx, ny, nz } = p;
 
   const musp  = mus * (1.0 - g);
@@ -221,7 +221,7 @@ function computeDiffusion(p) {
    for multiple scattering to set in at all — again invalidating the
    P1 assumption regardless of the μ_s'/μ_a ratio.
    ================================================================ */
-function checkDiffusionValidity(p, derived) {
+function checkValidity_FPW1992(p, derived) {
   const { mua } = p;
   const musp    = derived.musp;
   const ratio   = musp / mua;
@@ -232,7 +232,7 @@ function checkDiffusionValidity(p, derived) {
 
   if (ratio < 10) {
     reasons.push(
-      `μ_s'/μ_a = ${ratio.toFixed(3)} (want ≳10) — absorption is too strong ` +
+      `μ_s'/μ_a = ${ratio.toFixed(2)} (want ≳10) — absorption is too strong ` +
       `relative to scattering for light to randomize direction before being absorbed`
     );
   }
@@ -245,6 +245,68 @@ function checkDiffusionValidity(p, derived) {
 
   return { valid: reasons.length === 0, reasons };
 }
+
+/* ================================================================
+   MODEL REGISTRY
+   ================================================================
+   Each entry describes one theoretical model available in the
+   "Model" dropdown. To add a new model in future:
+
+     1. Write its compute function, computeXxx(p) → { phi, abs, derived }.
+        - `phi`/`abs` must be Float64Arrays of length nx*ny*nz, same
+          voxel ordering as the existing models (ix + iy*nx + iz*nx*ny).
+        - `derived` is a free-form object of scalar quantities you
+          want printed in the status line (see `summaryLine` below).
+     2. Write its validity-check function, checkXxx(p, derived) →
+        { valid, reasons }, or omit it if the model has no known
+        applicability limits.
+     3. Write a `summaryLine(derived)` function that formats the
+        derived quantities for the status bar (each model may expose
+        different derived quantities, so this isn't shared).
+     4. Add one entry below. The dropdown, run handler, and warning
+        display all pick this up automatically — no other code needs
+        to change.
+
+   If a future model needs *different input parameters* than
+   OPT_PARAMS/GRID_PARAMS (e.g. a second layer's optical properties),
+   the cleanest extension is to give that model its own `extraParams`
+   array in the same shape as OPT_PARAMS, rendered into a dedicated
+   grid container that's shown/hidden based on the selected model.
+   That's not needed yet since every current model shares the same
+   single-layer parameter set.
+   ================================================================ */
+const MODELS = {
+  fpw1992: {
+    label: 'Farrell, Patterson & Wilson (1992) — pencil beam, semi-infinite slab',
+    compute: computeDiffusion_FPW1992,
+    checkValidity: checkValidity_FPW1992,
+    summaryLine: (derived, dt) =>
+      `Done in ${dt} ms — μ_s' = ${derived.musp.toFixed(3)} cm⁻¹ | ` +
+      `D = ${derived.D.toFixed(4)} cm | μ_eff = ${derived.mueff.toFixed(4)} cm⁻¹ | ` +
+      `δ = ${derived.delta.toFixed(3)} cm`,
+  },
+
+  /* Example of what a second entry will look like once implemented:
+  kubelkaMunk: {
+    label: 'Kubelka–Munk (1931) — two-flux, planar layer',
+    compute: computeDiffusion_KubelkaMunk,
+    checkValidity: checkValidity_KubelkaMunk,   // optional
+    summaryLine: (derived, dt) => `Done in ${dt} ms — ...`,
+  },
+  */
+};
+
+function buildModelSelect() {
+  const sel = document.getElementById('model-select');
+  sel.innerHTML = '';
+  Object.entries(MODELS).forEach(([id, m]) => {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = m.label;
+    sel.appendChild(opt);
+  });
+}
+buildModelSelect();
 
 /* ================================================================
    COLORMAP  (deep-blue → cyan → green → yellow → red)
@@ -485,8 +547,10 @@ document.getElementById('run-btn').addEventListener('click', () => {
 
   /* Yield to browser for status paint, then compute */
   setTimeout(() => {
+    const model = MODELS[document.getElementById('model-select').value];
+
     const t0        = performance.now();
-    const { phi, abs, derived } = computeDiffusion(p);
+    const { phi, abs, derived } = model.compute(p);
     const dt        = (performance.now() - t0).toFixed(1);
 
     Simulation.set(p.nx, p.ny, p.nz, phi, abs);
@@ -508,13 +572,11 @@ document.getElementById('run-btn').addEventListener('click', () => {
     redraw('phi');
     redraw('abs');
 
-    const { musp, D, mueff, delta } = derived;
+    const summary = model.summaryLine(derived, dt);
 
-    const summary =
-      `Done in ${dt} ms — μ_s' = ${musp.toFixed(3)} cm⁻¹ | ` +
-      `D = ${D.toFixed(4)} cm | μ_eff = ${mueff.toFixed(4)} cm⁻¹ | δ = ${delta.toFixed(3)} cm`;
-
-    const validity = checkDiffusionValidity(p, derived);
+    const validity = model.checkValidity
+      ? model.checkValidity(p, derived)
+      : { valid: true, reasons: [] };
 
     st.textContent = '';
     st.appendChild(document.createTextNode(summary));

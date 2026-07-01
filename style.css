@@ -146,6 +146,21 @@ h1 {
   user-select: none;
 }
 
+.model-select {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.model-select:focus { border-color: var(--accent); }
+
 /* ── run button ──────────────────────────────────────────────── */
 #run-btn {
   margin-top: 14px;
