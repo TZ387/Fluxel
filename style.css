@@ -175,6 +175,11 @@ h1 {
   min-height: 16px;
 }
 
+.status-warn {
+  color: #d29922;
+  margin-top: 4px;
+}
+
 /* ── plots ───────────────────────────────────────────────────── */
 .plots-row {
   display: grid;

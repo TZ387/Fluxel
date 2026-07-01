@@ -199,6 +199,54 @@ function computeDiffusion(p) {
 }
 
 /* ================================================================
+   DIFFUSION-APPROXIMATION VALIDITY CHECK
+   ================================================================
+   The diffusion approximation replaces the full radiative transport
+   equation with its lowest-order (P1) angular expansion. That's only
+   accurate once light has scattered enough times to become nearly
+   isotropic before it's absorbed — i.e. when scattering dominates
+   absorption. The standard rule of thumb (see e.g. Star, 1997;
+   Jacques, 2013) is a reduced albedo
+
+     a' = μ_s' / (μ_s' + μ_a)
+
+   close to 1, commonly stated as requiring μ_s'/μ_a ≳ 10. Below that,
+   the solver still returns a number, but it systematically mis-
+   estimates fluence near the source because too much light is
+   absorbed before it can randomize direction.
+
+   A second, independent failure mode: if μ_s' itself is low relative
+   to the slab size, the transport mean free path becomes comparable
+   to (or larger than) the slab itself, so there isn't enough medium
+   for multiple scattering to set in at all — again invalidating the
+   P1 assumption regardless of the μ_s'/μ_a ratio.
+   ================================================================ */
+function checkDiffusionValidity(p, derived) {
+  const { mua } = p;
+  const musp    = derived.musp;
+  const ratio   = musp / mua;
+  const minDim  = Math.min(p.lx, p.ly, p.lz);
+  const mfpPrime = 1.0 / (mua + musp);   /* transport mean free path */
+
+  const reasons = [];
+
+  if (ratio < 10) {
+    reasons.push(
+      `μ_s'/μ_a = ${ratio.toFixed(3)} (want ≳10) — absorption is too strong ` +
+      `relative to scattering for light to randomize direction before being absorbed`
+    );
+  }
+  if (mfpPrime > 0.5 * minDim) {
+    reasons.push(
+      `transport mean free path (${mfpPrime.toFixed(3)} cm) is a large fraction of ` +
+      `the smallest slab dimension (${minDim.toFixed(3)} cm) — too little medium for multiple scattering to build up`
+    );
+  }
+
+  return { valid: reasons.length === 0, reasons };
+}
+
+/* ================================================================
    COLORMAP  (deep-blue → cyan → green → yellow → red)
    ================================================================ */
 const CMAP_STOPS = [
@@ -462,9 +510,23 @@ document.getElementById('run-btn').addEventListener('click', () => {
 
     const { musp, D, mueff, delta } = derived;
 
-    st.textContent =
+    const summary =
       `Done in ${dt} ms — μ_s' = ${musp.toFixed(3)} cm⁻¹ | ` +
       `D = ${D.toFixed(4)} cm | μ_eff = ${mueff.toFixed(4)} cm⁻¹ | δ = ${delta.toFixed(3)} cm`;
+
+    const validity = checkDiffusionValidity(p, derived);
+
+    st.textContent = '';
+    st.appendChild(document.createTextNode(summary));
+
+    if (!validity.valid) {
+      const warn = document.createElement('div');
+      warn.className = 'status-warn';
+      warn.textContent =
+        '⚠ Results may not be accurate — diffusion approximation is weakly justified here: ' +
+        validity.reasons.join('; ') + '.';
+      st.appendChild(warn);
+    }
 
     btn.disabled = false;
   }, 20);
