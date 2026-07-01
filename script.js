@@ -327,8 +327,8 @@ function drawSlices(cvId, vol, nx, ny, nz, ix, iy, iz, vmin, vmax) {
     (c, r) => getVoxel(c, r, iz), nx, ny);
 
   /* Slice labels */
-  ctx.font      = '10px monospace';
-  ctx.fillStyle = 'rgba(180,200,220,0.65)';
+  ctx.font      = 'bold 17px monospace';
+  ctx.fillStyle = 'rgba(12, 13, 15, 0.65)';
   ctx.fillText(`YZ  x = ${ix}`, tlX + 4, tlY + 12);
   ctx.fillText(`XZ  y = ${iy}`, trX + 4, trY + 12);
   ctx.fillText(`XY  z = ${iz}`, blX + 4, blY + 12);
