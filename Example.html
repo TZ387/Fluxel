@@ -21,15 +21,12 @@
   </div>
 </div>
 
+<!-- Each model declares its own paramGroups (models.js); this
+     container is torn down and rebuilt whenever the model changes,
+     so it stays empty in markup. -->
+<div id="param-panels"></div>
+
 <div class="panel">
-  <div class="panel-title">Optical properties</div>
-  <div class="param-grid" id="opt-grid">
-    <!-- rows injected by JS -->
-  </div>
-
-  <div class="panel-title" style="margin-top:16px">Grid</div>
-  <div class="param-grid" id="grid-grid"></div>
-
   <button id="run-btn">&#9654; Compute &amp; visualise</button>
   <div id="status">Adjust parameters and click Compute.</div>
 </div>

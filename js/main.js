@@ -121,7 +121,7 @@ window.addEventListener('resize', () => {
    MAIN RUN HANDLER
    ================================================================ */
 document.getElementById('run-btn').addEventListener('click', () => {
-  const p   = getParams();
+  const p   = getParams();   // reads whatever controls the current model's paramGroups produced
   const btn = document.getElementById('run-btn');
   const st  = document.getElementById('status');
 
@@ -178,8 +178,24 @@ document.getElementById('run-btn').addEventListener('click', () => {
 });
 
 /* ================================================================
+   MODEL SWITCHING
+   ================================================================
+   Each model owns its own paramGroups (schema + defaults — see
+   models.js), so switching models means tearing down and rebuilding
+   the whole parameter panel, not just resetting values. Any plots
+   from a previous model are hidden since they'd correspond to a
+   different (or no longer valid) set of inputs.
+   ================================================================ */
+function onModelChange() {
+  const model = MODELS[document.getElementById('model-select').value];
+  buildModelParams(model, 'param-panels');
+  document.getElementById('plots').style.display = 'none';
+  document.getElementById('status').textContent = 'Adjust parameters and click Compute.';
+}
+
+/* ================================================================
    INIT
    ================================================================ */
-buildParamGrid(OPT_PARAMS, 'opt-grid');
-buildParamGrid(GRID_PARAMS, 'grid-grid');
 buildModelSelect();
+document.getElementById('model-select').addEventListener('change', onModelChange);
+onModelChange();

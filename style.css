@@ -161,6 +161,56 @@ h1 {
   user-select: none;
 }
 
+/* ── repeating parameter groups (e.g. per-layer controls) ──────── */
+.repeat-group { display: flex; flex-direction: column; gap: 12px; }
+
+.repeat-instance {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--bg3);
+}
+
+.repeat-instance-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.repeat-remove-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.repeat-remove-btn:hover:not(:disabled) { color: #f85149; border-color: #f85149; }
+.repeat-remove-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+.repeat-add-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.repeat-add-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(88,166,255,0.08); }
+.repeat-add-btn:disabled { opacity: .35; cursor: not-allowed; }
+
 .model-select {
   font-family: var(--mono);
   font-size: 12px;
