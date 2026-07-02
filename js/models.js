@@ -63,32 +63,32 @@ const MODELS = {
     compute: computeDiffusion_FPW1992,
     checkValidity: checkValidity_FPW1992,
     summaryLine: (derived, dt) =>
-      `Done in ${dt} ms — μ_s' = ${derived.musp.toFixed(3)} cm⁻¹ | ` +
-      `D = ${derived.D.toFixed(4)} cm | μ_eff = ${derived.mueff.toFixed(4)} cm⁻¹ | ` +
+      `Done in ${dt} ms — μ<sub>s</sub>' = ${derived.musp.toFixed(3)} cm⁻¹ | ` +
+      `D = ${derived.D.toFixed(4)} cm | μ<sub>eff</sub> = ${derived.mueff.toFixed(4)} cm⁻¹ | ` +
       `δ = ${derived.delta.toFixed(3)} cm`,
 
     paramGroups: [
-      {
+            {
         id: 'optical',
         title: 'Optical properties',
         params: [
-          { id: 'mua', label: 'μ_a  absorption [cm⁻¹]',  min: 0.01, max: 5,    step: 0.001, def: 0.1,  fmt: fmt3 },
-          { id: 'mus', label: 'μ_s  scattering [cm⁻¹]',   min: 1,    max: 300,  step: 0.001, def: 100,  fmt: fmt3 },
-          { id: 'g',   label: 'g    anisotropy factor',   min: 0,    max: 0.99, step: 0.001, def: 0.9,  fmt: fmt3 },
-          { id: 'n',   label: 'n    refractive index',    min: 1.0,  max: 1.7,  step: 0.001, def: 1.4,  fmt: fmt3 },
-          { id: 'p0',  label: 'P₀   input power [W]',     min: 0.01, max: 10,   step: 0.001, def: 1.0,  fmt: fmt3 },
+          { id: 'mua', label: 'μ<sub>a</sub> absorption [cm⁻¹]', min: 0.01, max: 5, step: 0.001, def: 0.1, fmt: fmt3 },
+          { id: 'mus', label: 'μ<sub>s</sub> scattering [cm⁻¹]', min: 1, max: 300, step: 0.001, def: 100, fmt: fmt3 },
+          { id: 'g',   label: 'g anisotropy factor', min: 0, max: 0.99, step: 0.001, def: 0.9, fmt: fmt3 },
+          { id: 'n',   label: 'n refractive index', min: 1.0, max: 1.7, step: 0.001, def: 1.4, fmt: fmt3 },
+          { id: 'p0',  label: 'P<sub>0</sub> input power [W]', min: 0.01, max: 10, step: 0.001, def: 1.0, fmt: fmt3 },
         ],
       },
       {
         id: 'grid',
         title: 'Grid',
         params: [
-          { id: 'lx', label: 'L_x  [cm]',   min: 0.5, max: 6,  step: 0.001, def: 2,  fmt: fmt3 },
-          { id: 'ly', label: 'L_y  [cm]',   min: 0.5, max: 6,  step: 0.001, def: 2,  fmt: fmt3 },
-          { id: 'lz', label: 'L_z  [cm]',   min: 0.5, max: 6,  step: 0.001, def: 2,  fmt: fmt3 },
-          { id: 'nx', label: 'N_x  voxels', min: 10,  max: 80, step: 1,     def: 40, fmt: fmt0 },
-          { id: 'ny', label: 'N_y  voxels', min: 10,  max: 80, step: 1,     def: 40, fmt: fmt0 },
-          { id: 'nz', label: 'N_z  voxels', min: 10,  max: 80, step: 1,     def: 40, fmt: fmt0 },
+          { id: 'lx', label: 'L<sub>x</sub> [cm]', min: 0.5, max: 6, step: 0.001, def: 2, fmt: fmt3 },
+          { id: 'ly', label: 'L<sub>y</sub> [cm]', min: 0.5, max: 6, step: 0.001, def: 2, fmt: fmt3 },
+          { id: 'lz', label: 'L<sub>z</sub> [cm]', min: 0.5, max: 6, step: 0.001, def: 2, fmt: fmt3 },
+          { id: 'nx', label: 'N<sub>x</sub> voxels', min: 10, max: 80, step: 1, def: 40, fmt: fmt0 },
+          { id: 'ny', label: 'N<sub>y</sub> voxels', min: 10, max: 80, step: 1, def: 40, fmt: fmt0 },
+          { id: 'nz', label: 'N<sub>z</sub> voxels', min: 10, max: 80, step: 1, def: 40, fmt: fmt0 },
         ],
       },
     ],

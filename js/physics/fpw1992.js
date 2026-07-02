@@ -126,7 +126,7 @@ function checkValidity_FPW1992(p, derived) {
 
   if (ratio < 10) {
     reasons.push(
-      `μ_s'/μ_a = ${ratio.toFixed(2)} (want ≳10) — absorption is too strong ` +
+      `μ<sub>s</sub>'/μ<sub>a</sub> = ${ratio.toFixed(2)} (want ≳10) — absorption is too strong ` +
       `relative to scattering for light to randomize direction before being absorbed`
     );
   }

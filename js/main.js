@@ -162,12 +162,12 @@ document.getElementById('run-btn').addEventListener('click', () => {
       : { valid: true, reasons: [] };
 
     st.textContent = '';
-    st.appendChild(document.createTextNode(summary));
+    st.innerHTML = summary;
 
     if (!validity.valid) {
       const warn = document.createElement('div');
       warn.className = 'status-warn';
-      warn.textContent =
+      warn.innerHTML =
         '⚠ Results may not be accurate — diffusion approximation is weakly justified here: ' +
         validity.reasons.join('; ') + '.';
       st.appendChild(warn);
